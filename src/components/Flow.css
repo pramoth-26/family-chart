@@ -1,0 +1,210 @@
+.flow-container {
+    position: relative;
+    background-color: var(--color-bg);
+}
+
+.controls-sidebar {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 280px;
+    background: rgba(23, 25, 30, 0.95);
+    backdrop-filter: blur(12px);
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    z-index: 5;
+    color: white;
+}
+
+.left-sidebar {
+    right: auto;
+    left: 20px;
+}
+
+.family-list button {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.9);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9rem;
+}
+
+.family-list button:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+h3 {
+    margin: 0 0 16px 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: white;
+}
+
+.controls-sidebar h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
+}
+
+.control-group {
+    margin-bottom: 24px;
+}
+
+.control-group,
+.layout-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.controls-sidebar button {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--color-text);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.2s;
+}
+
+.controls-sidebar button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+}
+
+.controls-sidebar .btn-secondary {
+    background: var(--color-primary-glow);
+    color: #fff;
+}
+
+.controls-sidebar .btn-secondary:hover {
+    background: var(--color-primary);
+}
+
+.btn-primary-action {
+    background: var(--gradient-main);
+    color: white;
+    width: 100%;
+    font-weight: 600;
+    box-shadow: 0 4px 12px var(--color-primary-glow);
+}
+
+.btn-primary-action:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px var(--color-primary-glow);
+}
+
+/* React Flow Overrides */
+.react-flow__controls {
+    background: var(--color-surface);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.react-flow__controls-button {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: transparent;
+    width: 30px;
+    height: 30px;
+}
+
+.react-flow__controls-button svg {
+    fill: var(--color-text);
+}
+
+.react-flow__controls-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile Toggles */
+.mobile-toggle {
+    position: fixed;
+    top: 20px;
+    z-index: 20;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: white;
+    color: #333;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    display: none;
+    /* Hidden by default on desktop */
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.mobile-toggle:active {
+    transform: scale(0.95);
+}
+
+.mobile-toggle.left {
+    left: 20px;
+}
+
+.mobile-toggle.right {
+    right: 20px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .mobile-toggle {
+        display: flex;
+    }
+
+    .controls-sidebar {
+        width: 85%;
+        max-width: 320px;
+        height: auto;
+        max-height: 80vh;
+        overflow-y: auto;
+        top: 80px;
+        /* Below toggles */
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Right Sidebar (Controls) */
+    .controls-sidebar:not(.left-sidebar) {
+        right: 20px;
+        transform: translateX(120%);
+    }
+
+    .controls-sidebar:not(.left-sidebar).open {
+        transform: translateX(0);
+    }
+
+    /* Left Sidebar (Family List) */
+    .controls-sidebar.left-sidebar {
+        left: 20px;
+        right: auto;
+        transform: translateX(-120%);
+    }
+
+    .controls-sidebar.left-sidebar.open {
+        transform: translateX(0);
+    }
+
+    /* Adjust Flow Controls position */
+    .react-flow__controls {
+        bottom: 20px;
+        left: 20px;
+    }
+
+    .react-flow__minimap {
+        display: none;
+        /* Hide minimap on mobile to save space */
+    }
+}

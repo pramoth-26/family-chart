@@ -1,0 +1,38 @@
+.edgebutton-delete {
+    width: 20px;
+    height: 20px;
+    background: #ef4444;
+    color: white;
+    border: 1px solid white;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 10px;
+    line-height: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s;
+    opacity: 0;
+    /* Hidden by default */
+}
+
+/* Show button when hovering over the edge path or the button wrapper area */
+/* Note: Direct hover on edge path isn't easily captured by CSS for the label renderer content 
+   unless we wrap the whole thing or use React Flow state. 
+   For simplicity, we'll just make it visible or semi-translucent, 
+   or rely on the fact that users might hover near the center. 
+   
+   Better UX: Make it always visible but subtle, or fully visible on hover.
+*/
+
+.edgebutton-delete {
+    opacity: 0.8;
+    /* Always visible but subtle */
+}
+
+.edgebutton-delete:hover {
+    background: #dc2626;
+    transform: scale(1.1);
+    opacity: 1;
+}
