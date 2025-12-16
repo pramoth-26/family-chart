@@ -1,6 +1,6 @@
 import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
-import { useCallback, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect, useRef } from 'react';
 import ReactFlow, {
     addEdge,
     useNodesState,
@@ -177,6 +177,41 @@ const Flow = () => {
         }
     };
 
+    // Auto-save logic
+    const nodesRef = useRef(nodes);
+    const edgesRef = useRef(edges);
+    const currentFamilyIdRef = useRef(currentFamilyId);
+
+    useEffect(() => {
+        nodesRef.current = nodes;
+        edgesRef.current = edges;
+        currentFamilyIdRef.current = currentFamilyId;
+    }, [nodes, edges, currentFamilyId]);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const familyId = currentFamilyIdRef.current;
+            if (!familyId) return;
+
+            try {
+                const storedFamilies = getFamiliesFromStorage();
+                const updatedFamilies = storedFamilies.map(fam => {
+                    if (fam.id === familyId) {
+                        return { ...fam, nodes: nodesRef.current, edges: edgesRef.current };
+                    }
+                    return fam;
+                });
+
+                saveFamiliesToStorage(updatedFamilies);
+                console.log(`Auto-saved family: ${familyId} at ${new Date().toLocaleTimeString()}`);
+            } catch (error) {
+                console.error("Auto-save failed:", error);
+            }
+        }, 30000); // 30 seconds
+
+        return () => clearInterval(interval);
+    }, []);
+
     const onConnect = useCallback(
         (params) =>
             setEdges((eds) =>
@@ -334,16 +369,26 @@ const Flow = () => {
         const viewport = document.querySelector('.react-flow__viewport');
 
         if (viewport) {
+            // Dynamic scaling to prevent browser crash on large charts
+            let pixelRatio = 3;
+            if (imageWidth > 2500 || imageHeight > 2500) pixelRatio = 2;
+            if (imageWidth > 5000 || imageHeight > 5000) pixelRatio = 1;
+
+            // Warn if extremely large
+            if (imageWidth > 10000 || imageHeight > 10000) {
+                console.warn("Chart is extremely large, download might fail due to browser memory limits.");
+            }
+
             toPng(viewport, {
                 backgroundColor: '#0f1115', // Keep dark theme background
-                width: imageWidth * 2, // 2x dimensions for capture
-                height: imageHeight * 2,
+                width: imageWidth, // Use 1:1 dimensions to avoid double scaling
+                height: imageHeight,
                 style: {
                     width: imageWidth,
                     height: imageHeight,
                     transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
                 },
-                pixelRatio: 3, // High resolution (3x)
+                pixelRatio: pixelRatio, // Adjusted based on size
                 filter: (node) => {
                     // Exclude UI controls from download
                     if (node.classList) {
@@ -365,6 +410,9 @@ const Flow = () => {
                 // Add image to PDF (centered with margin)
                 pdf.addImage(dataUrl, 'PNG', 50, 50, imageWidth, imageHeight);
                 pdf.save('family-tree.pdf');
+            }).catch((error) => {
+                console.error("PDF generation failed:", error);
+                alert("Could not generate PDF. The chart is too large for the browser to render.");
             });
         }
     };
