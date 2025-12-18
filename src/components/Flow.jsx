@@ -369,26 +369,35 @@ const Flow = () => {
         const viewport = document.querySelector('.react-flow__viewport');
 
         if (viewport) {
-            // Dynamic scaling to prevent browser crash on large charts
-            let pixelRatio = 3;
-            if (imageWidth > 2500 || imageHeight > 2500) pixelRatio = 2;
-            if (imageWidth > 5000 || imageHeight > 5000) pixelRatio = 1;
+            // Dynamic scaling to avoid browser canvas limits (approx 16384px is hard limit, using 8000px as safe soft limit)
+            // This prevents "half chart" rendering issues by scaling down resolution while keeping full content
+            const MAX_CANVAS_DIM = 8000;
+            const maxDimension = Math.max(imageWidth, imageHeight);
 
-            // Warn if extremely large
-            if (imageWidth > 10000 || imageHeight > 10000) {
-                console.warn("Chart is extremely large, download might fail due to browser memory limits.");
+            // Default high res for normal inputs
+            let pixelRatio = 2;
+
+            // If chart is large, drop to standard resolution
+            if (maxDimension > 2500) {
+                pixelRatio = 1;
+            }
+
+            // If chart is extreme, scale down to fit continuously in canvas buffer
+            if (maxDimension * pixelRatio > MAX_CANVAS_DIM) {
+                pixelRatio = MAX_CANVAS_DIM / maxDimension;
+                console.warn(`Chart is extremely large (${maxDimension}px). Scaling down resolution by ${pixelRatio.toFixed(4)} to ensure full capture.`);
             }
 
             toPng(viewport, {
                 backgroundColor: '#0f1115', // Keep dark theme background
-                width: imageWidth, // Use 1:1 dimensions to avoid double scaling
+                width: imageWidth,
                 height: imageHeight,
                 style: {
                     width: imageWidth,
                     height: imageHeight,
                     transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
                 },
-                pixelRatio: pixelRatio, // Adjusted based on size
+                pixelRatio: pixelRatio,
                 filter: (node) => {
                     // Exclude UI controls from download
                     if (node.classList) {
@@ -404,7 +413,7 @@ const Flow = () => {
                 const pdf = new jsPDF({
                     orientation: imageWidth > imageHeight ? 'l' : 'p',
                     unit: 'px',
-                    format: [imageWidth + 100, imageHeight + 100] // Add some margin to page size
+                    format: [imageWidth + 100, imageHeight + 100] // Page matches chart size + margin
                 });
 
                 // Add image to PDF (centered with margin)
@@ -412,7 +421,7 @@ const Flow = () => {
                 pdf.save('family-tree.pdf');
             }).catch((error) => {
                 console.error("PDF generation failed:", error);
-                alert("Could not generate PDF. The chart is too large for the browser to render.");
+                alert("Could not generate PDF. The chart might be too complex for the browser.");
             });
         }
     };
@@ -605,7 +614,7 @@ const Flow = () => {
                 edgeTypes={edgeTypes}
                 fitView
             >
-                <Background color="#aaa" gap={16} />
+                <Background variant="dots" color="#aaa" gap={16} size={1} />
                 <Controls />
                 <MiniMap
                     nodeColor={(node) => {
