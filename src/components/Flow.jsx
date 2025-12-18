@@ -1,4 +1,4 @@
-import { toPng } from 'html-to-image';
+import { toPng, toJpeg } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 import { useCallback, useState, useEffect, useRef } from 'react';
 import ReactFlow, {
@@ -331,15 +331,17 @@ const Flow = () => {
         const viewport = document.querySelector('.react-flow__viewport');
 
         if (viewport) {
-            toPng(viewport, {
+            toJpeg(viewport, {
                 backgroundColor: '#0f1115', // Matches app bg
-                width: imageWidth * 2,  // Basic scaling if needed, or rely on transform
-                height: imageHeight * 2,
+                width: imageWidth,
+                height: imageHeight,
                 style: {
                     width: imageWidth,
                     height: imageHeight,
                     transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
                 },
+                pixelRatio: 3, // HD Quality
+                quality: 1.0,  // Max JPEG quality
                 filter: (node) => {
                     // Exclude UI controls from download
                     if (node.classList) {
@@ -353,7 +355,7 @@ const Flow = () => {
                 }
             }).then((dataUrl) => {
                 const link = document.createElement('a');
-                link.download = 'family-tree.png';
+                link.download = 'family-tree.jpeg';
                 link.href = dataUrl;
                 link.click();
             });
@@ -655,7 +657,7 @@ const Flow = () => {
                         Save to Browser
                     </button>
                     <button className="btn-primary-action" style={{ background: 'var(--color-primary)', marginTop: '10px' }} onClick={downloadImage}>
-                        Download PNG
+                        Download HD JPEG
                     </button>
                     <button className="btn-primary-action" style={{ background: '#ef4444', marginTop: '10px' }} onClick={downloadPDF}>
                         Download PDF (High Res)
