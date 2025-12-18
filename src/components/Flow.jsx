@@ -361,7 +361,13 @@ const Flow = () => {
     };
 
     const downloadPDF = () => {
-        const nodesBounds = getRectOfNodes(getNodes());
+        const nodes = getNodes();
+        if (nodes.length === 0) {
+            alert("No family tree data to download.");
+            return;
+        }
+
+        const nodesBounds = getRectOfNodes(nodes);
         const imageWidth = nodesBounds.width;
         const imageHeight = nodesBounds.height;
         const transform = getTransformForBounds(nodesBounds, imageWidth, imageHeight, 0.5, 2);
@@ -369,6 +375,9 @@ const Flow = () => {
         const viewport = document.querySelector('.react-flow__viewport');
 
         if (viewport) {
+            // Confirm size with user
+            const proceed = window.confirm(`Chart Actual Size: ${Math.round(imageWidth)}px x ${Math.round(imageHeight)}px.\n\nDownload PDF with these dimensions?`);
+            if (!proceed) return;
             // Dynamic scaling to avoid browser canvas limits (approx 16384px is hard limit, using 8000px as safe soft limit)
             // This prevents "half chart" rendering issues by scaling down resolution while keeping full content
             const MAX_CANVAS_DIM = 8000;
